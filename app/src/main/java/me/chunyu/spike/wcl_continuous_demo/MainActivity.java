@@ -146,7 +146,7 @@ public class MainActivity extends AppCompatActivity {
     public void setBusy(boolean busy) {
         if (mPbProgressBar.getProgress() > 0 &&
                 mPbProgressBar.getProgress() != mPbProgressBar.getMax()) {
-            mTvProgressText.setText("Progress: " + mPbProgressBar.getProgress());
+            mTvProgressText.setText(String.valueOf("Progress: " + mPbProgressBar.getProgress()));
         } else {
             mTvProgressText.setText(busy ? "Busy" : "Idle");
         }

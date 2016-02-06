@@ -24,23 +24,26 @@ public class CustomAsyncTask extends AsyncTask<Void, Integer, Void> {
         for (int i = 1; i < MainActivity.MAX_PROGRESS + 1; i++) {
             SystemClock.sleep(MainActivity.EMIT_DELAY_MS);
 
-            publishProgress(i);
+            publishProgress(i); // AsyncTask的方法
 
             Log.d(TAG, "count: " + i);
         }
         return null;
     }
 
+    @Override
     protected void onProgressUpdate(Integer... progress) {
         mActivity.get().setProgressValue((progress[0]));
         mActivity.get().setProgressText("Progress " + progress[0]);
     }
 
+    @Override
     protected void onPreExecute() {
         mActivity.get().setProgressText("Starting Async Task...");
         mCompleted = false;
     }
 
+    @Override
     protected void onPostExecute(Void result) {
         mCompleted = true;
         mActivity.get().setBusy(false);
