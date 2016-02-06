@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    tools:context="me.chunyu.spike.wcl_continuous_demo.MainActivity">
+
+    <Spinner
+        android:id="@+id/main_s_modes"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:enabled="false"
+        android:entries="@array/updaterType"/>
+
+    <Switch
+        android:id="@+id/main_s_track_leaks"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/main_s_modes"
+        android:layout_toEndOf="@+id/main_s_modes"
+        android:layout_toRightOf="@+id/main_s_modes"
+        android:checked="false"
+        android:text="@string/track_leaks"
+        tools:ignore="RtlHardcoded"/>
+
+    <LinearLayout
+        android:id="@+id/main_ll_group"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/main_s_modes"
+        android:layout_marginTop="16dp"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/main_b_start_button"
+            android:layout_width="100dp"
+            android:layout_height="wrap_content"
+            android:enabled="false"
+            tools:text="开始"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/main_tv_progress_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                tools:text="空闲"/>
+
+            <ProgressBar
+                android:id="@+id/main_pb_progress_bar"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:indeterminate="false"/>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</RelativeLayout>

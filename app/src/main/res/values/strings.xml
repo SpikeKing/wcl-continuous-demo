@@ -1,0 +1,24 @@
+<resources>
+    <string name="app_name">wcl-continuous-demo</string>
+
+    <string name="async_task">异步任务</string>
+    <string name="intent_service">消息服务</string>
+    <string name="list">列表</string>
+    <string name="timed_emitter">时间发射器</string>
+    <string name="cold_observable">冷观察</string>
+    <string name="custom_collection">定制容器</string>
+    <string name="custom_iterator">定制适配器</string>
+
+    <string-array name="updaterType">
+        <item>@string/async_task</item>
+        <item>@string/intent_service</item>
+        <item>@string/list</item>
+        <item>@string/timed_emitter</item>
+        <item>@string/cold_observable</item>
+        <item>@string/custom_collection</item>
+        <item>@string/custom_iterator</item>
+    </string-array>
+
+    <string name="track_leaks">检测泄露</string>
+
+</resources>
