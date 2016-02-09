@@ -3,6 +3,11 @@ package me.chunyu.spike.wcl_continuous_demo;
 import android.app.Fragment;
 import android.os.Bundle;
 
+/**
+ * 用于存储异步进程的Fragment
+ *
+ * @author wangchenlong
+ */
 public class RetainedFragment extends Fragment {
     private CustomAsyncTask mCustomAsyncTask; // 定制的异步任务
 

@@ -31,10 +31,15 @@ public class MainActivity extends AppCompatActivity {
     public final static int MAX_PROGRESS = 10; // 最大点
     public final static int EMIT_DELAY_MS = 1000; // 每次间隔
 
-    private RetainedFragment mRetainedFragment; // 保留Fragment
+    // 保留Fragment, 主要目的是为了旋转的时候, 保存异步线程.
+    private RetainedFragment mRetainedFragment;
+
     private CustomAsyncTask mCustomAsyncTask; // 异步任务
     private String mMode; // 进度条的选择模式
 
+    /**
+     * 旋转屏幕会调用这个函数
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -44,6 +49,7 @@ public class MainActivity extends AppCompatActivity {
         mPbProgressBar.setMax(MAX_PROGRESS); // 设置进度条最大值
         mSModesSpinner.setEnabled(mBStartButton.isEnabled()); // 设置是否可以允许
 
+        // 设置存储的Fragment
         FragmentManager fm = getFragmentManager();
         mRetainedFragment = (RetainedFragment) fm.findFragmentByTag(RETAINED_FRAGMENT);
 
@@ -60,30 +66,32 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
+        // Button点击事件
         mBStartButton.setOnClickListener(v -> {
             mMode = mSModesSpinner.getSelectedItem().toString();
             mRetainedFragment.setMode(mMode);
 
-            setBusy(true);
+            setBusy(true); // 设置繁忙
 
             if (mMode.equals(getString(R.string.async_task))) {
-                handleAsyncClick();
+                handleAsyncClick(); // 处理异步点击
             }
         });
 
+        // Spinner选择事件, 延迟处理
         mSModesSpinner.post(() -> mSModesSpinner.setOnItemSelectedListener(
                 new AdapterView.OnItemSelectedListener() {
                     @Override
                     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                        // 设置旋转模式
                         mMode = (String) parent.getItemAtPosition(position);
-
                         mRetainedFragment.setMode(mMode);
 
                         Log.d(TAG, "onItemSelected() " + parent.getItemAtPosition(position));
 
+                        // 获得异步任务
                         if (mMode.equals(getString(R.string.async_task))) {
                             Log.d(TAG, "onCreate() Mode: Async Task");
-
                             mCustomAsyncTask = mRetainedFragment.getCustomAsyncTask();
                         }
                     }
@@ -95,18 +103,23 @@ public class MainActivity extends AppCompatActivity {
         ));
     }
 
+
     @Override protected void onResume() {
         super.onResume();
 
         Log.d(TAG, "onResume() Leak tracking enabled: " + mSTrackLeaks.isChecked());
 
+        // 是否包含内存泄露
         if (mSTrackLeaks.isChecked()) {
             LeakCanary.install(getApplication());
         }
 
         mMode = mRetainedFragment.getMode();
 
-        Log.d(TAG, "onResume() Mode: " + mMode + " Button enabled: " + mBStartButton.isEnabled() + " Label: " + mBStartButton.getText() + " Text: " + mTvProgressText.getText());
+        Log.d(TAG, "onResume() Mode: " + mMode +
+                " Button enabled: " + mBStartButton.isEnabled() +
+                " Label: " + mBStartButton.getText() +
+                " Text: " + mTvProgressText.getText());
 
         if (mMode != null) {
             if (mMode.equals(getString(R.string.async_task))) {
@@ -125,36 +138,47 @@ public class MainActivity extends AppCompatActivity {
         setBusy(mRetainedFragment.isBusy());
     }
 
+    // 设置进度条的显示文字
     public void setProgressText(String text) {
         mTvProgressText.setText(text);
     }
 
+    // 设置进度条的值
     public void setProgressValue(int value) {
         mPbProgressBar.setProgress(value);
     }
 
+    // 处理异步线程的点击
     private void handleAsyncClick() {
+        // 获得异步线程
         mCustomAsyncTask = new CustomAsyncTask();
         mCustomAsyncTask.setActivity(this);
 
+        // 存储异步线程
         FragmentManager fm = getFragmentManager();
         mRetainedFragment = (RetainedFragment) fm.findFragmentByTag(RETAINED_FRAGMENT);
         mRetainedFragment.setCustomAsyncTask(mCustomAsyncTask);
+
+        // 执行异步线程
         mCustomAsyncTask.execute();
     }
 
+    // 设置进度条的状态
     public void setBusy(boolean busy) {
-        if (mPbProgressBar.getProgress() > 0 &&
-                mPbProgressBar.getProgress() != mPbProgressBar.getMax()) {
-            mTvProgressText.setText(String.valueOf("Progress: " + mPbProgressBar.getProgress()));
+        if (mPbProgressBar.getProgress() > 0 && mPbProgressBar.getProgress() != mPbProgressBar.getMax()) {
+            mTvProgressText.setText(String.valueOf("进度条:" + mPbProgressBar.getProgress()));
         } else {
-            mTvProgressText.setText(busy ? "Busy" : "Idle");
+            mTvProgressText.setText(busy ? "繁忙" : "闲置");
         }
 
-        mBStartButton.setText(busy ? "Busy" : "Start");
+        // 设置按钮显示
+        mBStartButton.setText(busy ? "繁忙" : "开始");
 
+        // 忙就不可以点击
         mBStartButton.setEnabled(!busy);
         mSModesSpinner.setEnabled(!busy);
+
+        // 设置繁忙状态
         mRetainedFragment.setBusy(busy);
     }
 }

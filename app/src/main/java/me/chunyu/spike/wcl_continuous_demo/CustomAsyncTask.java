@@ -7,14 +7,19 @@ import android.util.Log;
 import java.lang.ref.WeakReference;
 
 public class CustomAsyncTask extends AsyncTask<Void, Integer, Void> {
-    private static final String TAG = CustomAsyncTask.class.getSimpleName();
-    private WeakReference<MainActivity> mActivity;
-    private boolean mCompleted = false;
 
+    private static final String TAG = "DEBUG-WCL: " + CustomAsyncTask.class.getSimpleName();
+
+    private WeakReference<MainActivity> mActivity; // 弱引用Activity, 防止内存泄露
+
+    private boolean mCompleted = false; // 是否完成
+
+    // 设置Activity控制ProgressBar
     public void setActivity(MainActivity activity) {
         mActivity = new WeakReference<>(activity);
     }
 
+    // 判断是否完成
     public boolean isCompleted() {
         return mCompleted;
     }
@@ -22,30 +27,30 @@ public class CustomAsyncTask extends AsyncTask<Void, Integer, Void> {
     @Override
     protected Void doInBackground(Void... params) {
         for (int i = 1; i < MainActivity.MAX_PROGRESS + 1; i++) {
-            SystemClock.sleep(MainActivity.EMIT_DELAY_MS);
+            SystemClock.sleep(MainActivity.EMIT_DELAY_MS); // 暂停时间
 
-            publishProgress(i); // AsyncTask的方法
+            publishProgress(i); // AsyncTask的方法, 调用onProgressUpdate, 表示完成状态
 
-            Log.d(TAG, "count: " + i);
+            Log.d(TAG, "count: " + i); // 当前完成度
         }
         return null;
     }
 
     @Override
     protected void onProgressUpdate(Integer... progress) {
-        mActivity.get().setProgressValue((progress[0]));
-        mActivity.get().setProgressText("Progress " + progress[0]);
+        mActivity.get().setProgressValue((progress[0])); // 更新ProgressBar的值
+        mActivity.get().setProgressText("进度条:" + progress[0]); // 设置文字
     }
 
     @Override
     protected void onPreExecute() {
-        mActivity.get().setProgressText("Starting Async Task...");
+        mActivity.get().setProgressText("开始异步任务..."); // 准备开始
         mCompleted = false;
     }
 
     @Override
     protected void onPostExecute(Void result) {
-        mCompleted = true;
+        mCompleted = true; // 结束
         mActivity.get().setBusy(false);
     }
 }
