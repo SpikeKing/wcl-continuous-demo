@@ -12,19 +12,23 @@
 
     <Spinner
         android:id="@+id/main_s_modes"
-        android:layout_width="wrap_content"
+        android:layout_width="124dp"
         android:layout_height="wrap_content"
         android:enabled="false"
-        android:entries="@array/updaterType"/>
+        android:entries="@array/updaterType"
+        android:gravity="center"/>
 
     <Switch
         android:id="@+id/main_s_track_leaks"
-        android:layout_width="wrap_content"
+        android:layout_width="106dp"
         android:layout_height="wrap_content"
         android:layout_alignTop="@+id/main_s_modes"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
         android:layout_toEndOf="@+id/main_s_modes"
         android:layout_toRightOf="@+id/main_s_modes"
         android:checked="false"
+        android:gravity="center_vertical"
         android:text="@string/track_leaks"
         tools:ignore="RtlHardcoded"/>
 
@@ -38,7 +42,7 @@
 
         <Button
             android:id="@+id/main_b_start_button"
-            android:layout_width="100dp"
+            android:layout_width="80dp"
             android:layout_height="wrap_content"
             android:enabled="false"
             tools:text="开始"/>
@@ -46,8 +50,8 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="8dp"
-            android:layout_marginRight="8dp"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
             android:orientation="vertical">
 
             <TextView
@@ -68,5 +72,14 @@
         </LinearLayout>
 
     </LinearLayout>
+
+    <TextView
+        android:id="@+id/description"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/main_ll_group"
+        android:layout_centerHorizontal="true"
+        android:layout_margin="8dp"
+        android:text="@string/update_progress_desc"/>
 
 </RelativeLayout>

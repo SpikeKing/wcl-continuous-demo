@@ -20,5 +20,6 @@
     </string-array>
 
     <string name="track_leaks">检测泄露</string>
+    <string name="update_progress_desc">更新进度条并旋转设备</string>
 
 </resources>
