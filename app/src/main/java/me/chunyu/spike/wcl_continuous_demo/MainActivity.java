@@ -21,6 +21,9 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "DEBUG-WCL: " + MainActivity.class.getSimpleName();
 
+    // Spinner的位置
+    private static final int ASYNC_TASK = 0;
+
     @Bind(R.id.main_s_modes) Spinner mSModesSpinner; // 切换模式
     @Bind(R.id.main_s_track_leaks) Switch mSTrackLeaks; // 检测内存
     @Bind(R.id.main_tv_progress_text) TextView mTvProgressText; // 处理文本
@@ -35,7 +38,7 @@ public class MainActivity extends AppCompatActivity {
     private RetainedFragment mRetainedFragment;
 
     private CustomAsyncTask mCustomAsyncTask; // 异步任务
-    private String mMode; // 进度条的选择模式
+    private int mMode; // 进度条的选择模式
 
     /**
      * 旋转屏幕会调用这个函数
@@ -59,44 +62,45 @@ public class MainActivity extends AppCompatActivity {
             fm.beginTransaction().add(mRetainedFragment, RETAINED_FRAGMENT).commit();
         } else {
             mMode = mRetainedFragment.getMode();
-            if (mMode != null) {
-                if (mMode.equals(getString(R.string.async_task))) {
+            switch (mMode) {
+                case ASYNC_TASK:
                     mCustomAsyncTask = mRetainedFragment.getCustomAsyncTask();
-                }
+                    break;
+                default:
+                    break;
             }
         }
 
         // Button点击事件
         mBStartButton.setOnClickListener(v -> {
-                    mMode = mSModesSpinner.getSelectedItem().toString();
                     mRetainedFragment.setMode(mMode);
-
                     setBusy(true); // 设置繁忙
-
-                    if (mMode.equals(getString(R.string.async_task))) {
-                        handleAsyncClick(); // 处理异步点击
+                    switch (mMode) {
+                        case ASYNC_TASK:
+                            handleAsyncClick();
+                            break;
+                        default:
+                            break;
                     }
                 }
-
         );
 
         // Spinner选择事件, 延迟处理
         mSModesSpinner.post(() -> mSModesSpinner.setOnItemSelectedListener(
-                new AdapterView.OnItemSelectedListener()
-
-                {
+                new AdapterView.OnItemSelectedListener() {
                     @Override
                     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                         // 设置旋转模式
-                        mMode = (String) parent.getItemAtPosition(position);
+                        mMode = position;
                         mRetainedFragment.setMode(mMode);
 
-                        Log.d(TAG, "onItemSelected() " + parent.getItemAtPosition(position));
-
                         // 获得异步任务
-                        if (mMode.equals(getString(R.string.async_task))) {
-                            Log.d(TAG, "onCreate() Mode: Async Task");
-                            mCustomAsyncTask = mRetainedFragment.getCustomAsyncTask();
+                        switch (position) {
+                            case ASYNC_TASK:
+                                mCustomAsyncTask = mRetainedFragment.getCustomAsyncTask();
+                                break;
+                            default:
+                                break;
                         }
                     }
 
@@ -104,7 +108,6 @@ public class MainActivity extends AppCompatActivity {
 
                     }
                 }
-
         ));
     }
 
@@ -131,8 +134,8 @@ public class MainActivity extends AppCompatActivity {
                 " Label: " + mBStartButton.getText() +
                 " Text: " + mTvProgressText.getText());
 
-        if (mMode != null) {
-            if (mMode.equals(getString(R.string.async_task))) {
+        switch (mMode) {
+            case ASYNC_TASK:
                 mCustomAsyncTask = mRetainedFragment.getCustomAsyncTask();
 
                 if (mCustomAsyncTask != null) {
@@ -143,7 +146,10 @@ public class MainActivity extends AppCompatActivity {
                         mRetainedFragment.setCustomAsyncTask(null);
                     }
                 }
-            }
+                break;
+            default:
+                break;
+
         }
 
         setBusy(mRetainedFragment.isBusy());

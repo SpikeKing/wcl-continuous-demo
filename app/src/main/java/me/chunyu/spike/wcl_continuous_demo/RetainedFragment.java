@@ -11,7 +11,7 @@ import android.os.Bundle;
 public class RetainedFragment extends Fragment {
     private CustomAsyncTask mCustomAsyncTask; // 定制的异步任务
 
-    private String mMode; // 进度条模式
+    private int mMode; // 进度条模式
     private boolean mBusy; // 是否繁忙
 
     @Override
@@ -28,11 +28,11 @@ public class RetainedFragment extends Fragment {
         mCustomAsyncTask = customAsyncTask;
     }
 
-    public String getMode() {
+    public int getMode() {
         return mMode;
     }
 
-    public void setMode(String mode) {
+    public void setMode(int mode) {
         mMode = mode;
     }
 
