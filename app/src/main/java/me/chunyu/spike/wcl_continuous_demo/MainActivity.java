@@ -68,19 +68,23 @@ public class MainActivity extends AppCompatActivity {
 
         // Button点击事件
         mBStartButton.setOnClickListener(v -> {
-            mMode = mSModesSpinner.getSelectedItem().toString();
-            mRetainedFragment.setMode(mMode);
+                    mMode = mSModesSpinner.getSelectedItem().toString();
+                    mRetainedFragment.setMode(mMode);
 
-            setBusy(true); // 设置繁忙
+                    setBusy(true); // 设置繁忙
 
-            if (mMode.equals(getString(R.string.async_task))) {
-                handleAsyncClick(); // 处理异步点击
-            }
-        });
+                    if (mMode.equals(getString(R.string.async_task))) {
+                        handleAsyncClick(); // 处理异步点击
+                    }
+                }
+
+        );
 
         // Spinner选择事件, 延迟处理
         mSModesSpinner.post(() -> mSModesSpinner.setOnItemSelectedListener(
-                new AdapterView.OnItemSelectedListener() {
+                new AdapterView.OnItemSelectedListener()
+
+                {
                     @Override
                     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                         // 设置旋转模式
@@ -100,10 +104,16 @@ public class MainActivity extends AppCompatActivity {
 
                     }
                 }
+
         ));
     }
 
-
+    /**
+     * 在onResume中设置setActivity, 因为会执行onRestoreInstanceState方法,
+     * 会恢复旋转屏幕之前保存的数据, mPbProgressBar的值, 再设置初始值.
+     * 如果移到onCreate时设置, 则会导致Progress值为0, 因为Activity并没有开始恢复数据.
+     * 生命周期: onCreate -> onRestoreInstanceState -> onResume.
+     */
     @Override protected void onResume() {
         super.onResume();
 
@@ -127,6 +137,7 @@ public class MainActivity extends AppCompatActivity {
 
                 if (mCustomAsyncTask != null) {
                     if (!mCustomAsyncTask.isCompleted()) {
+                        Log.e(TAG, "设置Activity");
                         mCustomAsyncTask.setActivity(this);
                     } else {
                         mRetainedFragment.setCustomAsyncTask(null);
@@ -165,9 +176,12 @@ public class MainActivity extends AppCompatActivity {
 
     // 设置进度条的状态
     public void setBusy(boolean busy) {
+        Log.e(TAG, "progress: " + mPbProgressBar.getProgress());
         if (mPbProgressBar.getProgress() > 0 && mPbProgressBar.getProgress() != mPbProgressBar.getMax()) {
-            mTvProgressText.setText(String.valueOf("进度条:" + mPbProgressBar.getProgress()));
+            mTvProgressText.setText(String.valueOf("进度" + mPbProgressBar.getProgress() * 100 / MAX_PROGRESS + "%"));
+            Log.e(TAG, String.valueOf("进度" + mPbProgressBar.getProgress() * 100 / MAX_PROGRESS + "%"));
         } else {
+            Log.e(TAG, busy ? "繁忙" : "闲置");
             mTvProgressText.setText(busy ? "繁忙" : "闲置");
         }
 

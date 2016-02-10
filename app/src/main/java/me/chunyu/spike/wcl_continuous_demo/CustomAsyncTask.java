@@ -39,7 +39,7 @@ public class CustomAsyncTask extends AsyncTask<Void, Integer, Void> {
     @Override
     protected void onProgressUpdate(Integer... progress) {
         mActivity.get().setProgressValue((progress[0])); // 更新ProgressBar的值
-        mActivity.get().setProgressText("进度条:" + progress[0]); // 设置文字
+        mActivity.get().setProgressText("进度" + progress[0] * 100 / MainActivity.MAX_PROGRESS + "%"); // 设置文字
     }
 
     @Override
@@ -52,5 +52,6 @@ public class CustomAsyncTask extends AsyncTask<Void, Integer, Void> {
     protected void onPostExecute(Void result) {
         mCompleted = true; // 结束
         mActivity.get().setBusy(false);
+        mActivity.get().setProgressValue(0);
     }
 }
