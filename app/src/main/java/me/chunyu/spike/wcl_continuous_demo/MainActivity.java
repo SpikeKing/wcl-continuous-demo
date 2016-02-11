@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -19,8 +20,14 @@ import android.widget.TextView;
 
 import com.squareup.leakcanary.LeakCanary;
 
+import java.util.concurrent.TimeUnit;
+
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import rx.Observable;
+import rx.Subscriber;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
 
 /**
  * 使用各种异步线程处理屏幕旋转.
@@ -33,6 +40,8 @@ public class MainActivity extends AppCompatActivity {
     // Spinner的位置
     private static final int ASYNC_TASK = 0; // 异步任务
     private static final int INTENT_SERVICE = 1; // 消息服务
+    private static final int TIME_EMITTER = 2; // 时间发射器
+    private static final int DELAY_OBSERVABLE = 3; // 延迟观察
 
     public static final String UPDATE_PROGRESS_FILTER = "update_progress_filter";
 
@@ -52,17 +61,21 @@ public class MainActivity extends AppCompatActivity {
     private CustomAsyncTask mCustomAsyncTask; // 异步任务
     private int mMode = ASYNC_TASK; // 进度条的选择模式
 
-    private LocalBroadcastManager mLbm; // 广播接收器, 配合服务使用.
+    private LocalBroadcastManager mLbm; // 广播接收器, 配合服务使用
+
+    private Observable<Long> mObservable; // 观察者
+    private Subscriber<Long> mSubscriber; // 订阅者
 
     private BroadcastReceiver mUpdateProgressReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
-            if (intent.hasExtra(CustomService.KEY_EXTRA_BUSY)) {
-                setBusy(intent.getBooleanExtra(CustomService.KEY_EXTRA_BUSY, false));
-            }
             if (intent.hasExtra(CustomService.KEY_EXTRA_PROGRESS)) {
                 int progress = intent.getIntExtra(CustomService.KEY_EXTRA_PROGRESS, 0);
                 mPbProgressBar.setProgress(progress);
                 setProgressPercentText(progress);
+            }
+
+            if (intent.hasExtra(CustomService.KEY_EXTRA_BUSY)) {
+                setBusy(intent.getBooleanExtra(CustomService.KEY_EXTRA_BUSY, false));
             }
         }
     };
@@ -121,6 +134,12 @@ public class MainActivity extends AppCompatActivity {
             case INTENT_SERVICE:
                 handleIntentServiceClick();
                 break;
+            case TIME_EMITTER:
+                handleTimeEmitterClick();
+                break;
+            case DELAY_OBSERVABLE:
+                handleDelayObservableClick();
+                break;
             default:
                 break;
         }
@@ -143,11 +162,13 @@ public class MainActivity extends AppCompatActivity {
         }
 
         mMode = mRetainedFragment.getMode();
+        mCustomAsyncTask = mRetainedFragment.getCustomAsyncTask();
+
+        mObservable = mRetainedFragment.getObservable();
+        mSubscriber = createSubscriber();
 
         switch (mMode) {
             case ASYNC_TASK:
-                mCustomAsyncTask = mRetainedFragment.getCustomAsyncTask();
-
                 if (mCustomAsyncTask != null) {
                     if (!mCustomAsyncTask.isCompleted()) {
                         mCustomAsyncTask.setActivity(this);
@@ -156,12 +177,35 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
                 break;
+            case TIME_EMITTER:
+                if (mObservable != null) {
+                    mObservable.subscribeOn(Schedulers.io())
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .take(MAX_PROGRESS)
+                            .map(x -> x + 1)
+                            .subscribe(mSubscriber);
+                }
+                break;
+            case DELAY_OBSERVABLE:
+                if (mObservable != null) {
+                    mObservable.subscribeOn(Schedulers.io())
+                            .delay(1, TimeUnit.SECONDS)
+                            .subscribeOn(AndroidSchedulers.mainThread())
+                            .subscribe(mSubscriber);
+                }
+                break;
             default:
                 break;
-
         }
 
         setBusy(mRetainedFragment.isBusy());
+    }
+
+    @Override protected void onPause() {
+        super.onPause();
+        if (mSubscriber != null) {
+            mSubscriber.unsubscribe();
+        }
     }
 
     @Override protected void onDestroy() {
@@ -201,8 +245,74 @@ public class MainActivity extends AppCompatActivity {
 
     private void handleIntentServiceClick() {
         mTvProgressText.setText("开始消息服务...");
+
         Intent intent = new Intent(this, CustomService.class);
         startService(intent);
+    }
+
+    private void handleTimeEmitterClick() {
+        mTvProgressText.setText("开始时间发射器...");
+
+        mSubscriber = createSubscriber();
+        mObservable = Observable.interval(1, TimeUnit.SECONDS);
+
+        mObservable.subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .take(MAX_PROGRESS)
+                .map(x -> x + 1)
+                .subscribe(mSubscriber);
+
+        mRetainedFragment.setObservable(mObservable);
+    }
+
+    private void handleDelayObservableClick() {
+        mTvProgressText.setText("开始延迟观察...");
+
+        mSubscriber = createSubscriber();
+        mObservable = createObservable();
+
+        mObservable.subscribeOn(Schedulers.io())
+//                .delay(1, TimeUnit.SECONDS)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(mSubscriber);
+
+        mRetainedFragment.setObservable(mObservable);
+    }
+
+    // 创建订阅者
+    private Subscriber<Long> createSubscriber() {
+        return new Subscriber<Long>() {
+            @Override public void onCompleted() {
+                setBusy(false);
+                mRetainedFragment.setObservable(null);
+            }
+
+            @Override public void onError(Throwable e) {
+                setBusy(false);
+                mTvProgressText.setText(String.valueOf("Error!"));
+                mObservable = null;
+
+                mRetainedFragment.setObservable(null);
+            }
+
+            @Override public void onNext(Long aLong) {
+                setProgressPercentText(aLong.intValue());
+                mPbProgressBar.setProgress(aLong.intValue());
+            }
+        };
+    }
+
+    // 创建观察者
+    private Observable<Long> createObservable() {
+        return Observable.create(new Observable.OnSubscribe<Long>() {
+            @Override public void call(Subscriber<? super Long> subscriber) {
+                for (long i = 1; i < MAX_PROGRESS + 1; i++) {
+                    SystemClock.sleep(EMIT_DELAY_MS);
+                    subscriber.onNext(i);
+                }
+                subscriber.onCompleted();
+            }
+        });
     }
 
     // 设置进度条的状态

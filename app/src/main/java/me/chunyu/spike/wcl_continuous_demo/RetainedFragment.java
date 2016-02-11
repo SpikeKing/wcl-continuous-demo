@@ -3,6 +3,8 @@ package me.chunyu.spike.wcl_continuous_demo;
 import android.app.Fragment;
 import android.os.Bundle;
 
+import rx.Observable;
+
 /**
  * 用于存储异步进程的Fragment
  *
@@ -10,6 +12,7 @@ import android.os.Bundle;
  */
 public class RetainedFragment extends Fragment {
     private CustomAsyncTask mCustomAsyncTask; // 定制的异步任务
+    private Observable<Long> mObservable; // 观察者
 
     private int mMode; // 进度条模式
     private boolean mBusy; // 是否繁忙
@@ -26,6 +29,14 @@ public class RetainedFragment extends Fragment {
 
     public void setCustomAsyncTask(CustomAsyncTask customAsyncTask) {
         mCustomAsyncTask = customAsyncTask;
+    }
+
+    public Observable<Long> getObservable() {
+        return mObservable;
+    }
+
+    public void setObservable(Observable<Long> observable) {
+        mObservable = observable;
     }
 
     public int getMode() {
