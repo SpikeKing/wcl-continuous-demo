@@ -42,7 +42,7 @@ public class MainActivity extends AppCompatActivity {
     private static final int ASYNC_TASK = 0; // 异步任务
     private static final int INTENT_SERVICE = 1; // 消息服务
     private static final int TIME_INTERVAL = 2; // 时间间隔
-    private static final int DELAY_EMIT = 3; // 延迟发射
+    private static final int DELAY_EMIT = 3; // 延迟发送
     private static final int CUSTOM_ITERATOR = 4; // 定制迭代
 
     public static final String UPDATE_PROGRESS_FILTER = "update_progress_filter";
@@ -54,8 +54,8 @@ public class MainActivity extends AppCompatActivity {
     @Bind(R.id.main_b_start_button) Button mBStartButton; // 开始按钮
 
     private static final String RETAINED_FRAGMENT = "retained_fragment"; // Fragment的标签
-    public final static int MAX_PROGRESS = 5; // 最大点
-    public final static int EMIT_DELAY_MS = 500; // 每次间隔
+    public final static int MAX_PROGRESS = 10; // 最大点
+    public final static int EMIT_DELAY_MS = 1000; // 每次间隔
 
     // 保留Fragment, 主要目的是为了旋转的时候, 保存异步线程.
     private RetainedFragment mRetainedFragment;
@@ -160,8 +160,6 @@ public class MainActivity extends AppCompatActivity {
     @Override protected void onResume() {
         super.onResume();
 
-        Log.d(TAG, "onResume() Leak tracking enabled: " + mSTrackLeaks.isChecked());
-
         // 是否包含内存泄露
         if (mSTrackLeaks.isChecked()) {
             LeakCanary.install(getApplication());
@@ -246,8 +244,6 @@ public class MainActivity extends AppCompatActivity {
         mCustomAsyncTask.setActivity(this);
 
         // 存储异步线程
-        FragmentManager fm = getFragmentManager();
-        mRetainedFragment = (RetainedFragment) fm.findFragmentByTag(RETAINED_FRAGMENT);
         mRetainedFragment.setCustomAsyncTask(mCustomAsyncTask);
 
         // 执行异步线程
@@ -277,7 +273,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void handleDelayEmitClick() {
-        mTvProgressText.setText("开始延迟发射...");
+        mTvProgressText.setText("开始延迟发送...");
 
         mSubscriber = createSubscriber();
         mObservable = createObservable();
@@ -296,14 +292,14 @@ public class MainActivity extends AppCompatActivity {
         mSubscriber = createSubscriber();
         mSubject = PublishSubject.create();
 
-        mRetainedFragment.setObservable(mObservable);
-        mRetainedFragment.setSubject(mSubject);
-
         mObservable.subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(mSubject);
 
         mSubject.subscribe(mSubscriber);
+
+        mRetainedFragment.setObservable(mObservable);
+        mRetainedFragment.setSubject(mSubject);
     }
 
     // 创建订阅者
@@ -330,7 +326,7 @@ public class MainActivity extends AppCompatActivity {
         };
     }
 
-    // 创建观察者
+    // 创建延迟观察者
     private Observable<Long> createObservable() {
         return Observable.create(new Observable.OnSubscribe<Long>() {
             @Override public void call(Subscriber<? super Long> subscriber) {

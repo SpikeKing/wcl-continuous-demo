@@ -4,7 +4,7 @@
     <string name="async_task">异步任务(可旋转)</string>
     <string name="intent_service">消息服务(可旋转)</string>
     <string name="time_interval">时间间隔(非旋转)</string>
-    <string name="delay_emit">延迟发射(非旋转)</string>
+    <string name="delay_emit">延迟发送(非旋转)</string>
     <string name="custom_iterator">定制迭代(可旋转)</string>
 
     <string-array name="updaterType">

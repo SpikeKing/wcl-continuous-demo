@@ -8,8 +8,6 @@ import java.lang.ref.WeakReference;
 
 public class CustomAsyncTask extends AsyncTask<Void, Integer, Void> {
 
-    private static final String TAG = "DEBUG-WCL: " + CustomAsyncTask.class.getSimpleName();
-
     private WeakReference<MainActivity> mActivity; // 弱引用Activity, 防止内存泄露
 
     private boolean mCompleted = false; // 是否完成
@@ -28,10 +26,7 @@ public class CustomAsyncTask extends AsyncTask<Void, Integer, Void> {
     protected Void doInBackground(Void... params) {
         for (int i = 1; i < MainActivity.MAX_PROGRESS + 1; i++) {
             SystemClock.sleep(MainActivity.EMIT_DELAY_MS); // 暂停时间
-
             publishProgress(i); // AsyncTask的方法, 调用onProgressUpdate, 表示完成状态
-
-            Log.d(TAG, "count: " + i); // 当前完成度
         }
         return null;
     }
