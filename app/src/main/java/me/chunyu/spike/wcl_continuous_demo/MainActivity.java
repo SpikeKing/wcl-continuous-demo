@@ -28,6 +28,7 @@ import rx.Observable;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
+import rx.subjects.PublishSubject;
 
 /**
  * 使用各种异步线程处理屏幕旋转.
@@ -40,8 +41,9 @@ public class MainActivity extends AppCompatActivity {
     // Spinner的位置
     private static final int ASYNC_TASK = 0; // 异步任务
     private static final int INTENT_SERVICE = 1; // 消息服务
-    private static final int TIME_EMITTER = 2; // 时间发射器
-    private static final int DELAY_OBSERVABLE = 3; // 延迟观察
+    private static final int TIME_INTERVAL = 2; // 时间间隔
+    private static final int DELAY_EMIT = 3; // 延迟发射
+    private static final int CUSTOM_ITERATOR = 4; // 定制迭代
 
     public static final String UPDATE_PROGRESS_FILTER = "update_progress_filter";
 
@@ -52,8 +54,8 @@ public class MainActivity extends AppCompatActivity {
     @Bind(R.id.main_b_start_button) Button mBStartButton; // 开始按钮
 
     private static final String RETAINED_FRAGMENT = "retained_fragment"; // Fragment的标签
-    public final static int MAX_PROGRESS = 10; // 最大点
-    public final static int EMIT_DELAY_MS = 1000; // 每次间隔
+    public final static int MAX_PROGRESS = 5; // 最大点
+    public final static int EMIT_DELAY_MS = 500; // 每次间隔
 
     // 保留Fragment, 主要目的是为了旋转的时候, 保存异步线程.
     private RetainedFragment mRetainedFragment;
@@ -65,6 +67,7 @@ public class MainActivity extends AppCompatActivity {
 
     private Observable<Long> mObservable; // 观察者
     private Subscriber<Long> mSubscriber; // 订阅者
+    private PublishSubject<Long> mSubject; // 发布主题
 
     private BroadcastReceiver mUpdateProgressReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
@@ -134,11 +137,14 @@ public class MainActivity extends AppCompatActivity {
             case INTENT_SERVICE:
                 handleIntentServiceClick();
                 break;
-            case TIME_EMITTER:
-                handleTimeEmitterClick();
+            case TIME_INTERVAL:
+                handleTimeIntervalClick();
                 break;
-            case DELAY_OBSERVABLE:
-                handleDelayObservableClick();
+            case DELAY_EMIT:
+                handleDelayEmitClick();
+                break;
+            case CUSTOM_ITERATOR:
+                handleCustomIteratorClick();
                 break;
             default:
                 break;
@@ -165,6 +171,7 @@ public class MainActivity extends AppCompatActivity {
         mCustomAsyncTask = mRetainedFragment.getCustomAsyncTask();
 
         mObservable = mRetainedFragment.getObservable();
+        mSubject = mRetainedFragment.getSubject();
         mSubscriber = createSubscriber();
 
         switch (mMode) {
@@ -177,7 +184,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
                 break;
-            case TIME_EMITTER:
+            case TIME_INTERVAL:
                 if (mObservable != null) {
                     mObservable.subscribeOn(Schedulers.io())
                             .observeOn(AndroidSchedulers.mainThread())
@@ -186,7 +193,7 @@ public class MainActivity extends AppCompatActivity {
                             .subscribe(mSubscriber);
                 }
                 break;
-            case DELAY_OBSERVABLE:
+            case DELAY_EMIT:
                 if (mObservable != null) {
                     mObservable.subscribeOn(Schedulers.io())
                             .delay(1, TimeUnit.SECONDS)
@@ -194,6 +201,10 @@ public class MainActivity extends AppCompatActivity {
                             .subscribe(mSubscriber);
                 }
                 break;
+            case CUSTOM_ITERATOR:
+                if (mSubject != null) {
+                    mSubject.subscribe(mSubscriber);
+                }
             default:
                 break;
         }
@@ -250,8 +261,8 @@ public class MainActivity extends AppCompatActivity {
         startService(intent);
     }
 
-    private void handleTimeEmitterClick() {
-        mTvProgressText.setText("开始时间发射器...");
+    private void handleTimeIntervalClick() {
+        mTvProgressText.setText("开始时间间隔...");
 
         mSubscriber = createSubscriber();
         mObservable = Observable.interval(1, TimeUnit.SECONDS);
@@ -265,18 +276,34 @@ public class MainActivity extends AppCompatActivity {
         mRetainedFragment.setObservable(mObservable);
     }
 
-    private void handleDelayObservableClick() {
-        mTvProgressText.setText("开始延迟观察...");
+    private void handleDelayEmitClick() {
+        mTvProgressText.setText("开始延迟发射...");
 
         mSubscriber = createSubscriber();
         mObservable = createObservable();
 
         mObservable.subscribeOn(Schedulers.io())
-//                .delay(1, TimeUnit.SECONDS)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(mSubscriber);
 
         mRetainedFragment.setObservable(mObservable);
+    }
+
+    private void handleCustomIteratorClick() {
+        mTvProgressText.setText("开始定制迭代器...");
+
+        mObservable = Observable.from(new CustomIterator());
+        mSubscriber = createSubscriber();
+        mSubject = PublishSubject.create();
+
+        mRetainedFragment.setObservable(mObservable);
+        mRetainedFragment.setSubject(mSubject);
+
+        mObservable.subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(mSubject);
+
+        mSubject.subscribe(mSubscriber);
     }
 
     // 创建订阅者

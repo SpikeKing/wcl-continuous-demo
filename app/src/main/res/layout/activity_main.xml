@@ -12,7 +12,7 @@
 
     <Spinner
         android:id="@+id/main_s_modes"
-        android:layout_width="124dp"
+        android:layout_width="160dp"
         android:layout_height="wrap_content"
         android:enabled="false"
         android:entries="@array/updaterType"

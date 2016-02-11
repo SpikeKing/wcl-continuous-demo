@@ -4,6 +4,7 @@ import android.app.Fragment;
 import android.os.Bundle;
 
 import rx.Observable;
+import rx.subjects.PublishSubject;
 
 /**
  * 用于存储异步进程的Fragment
@@ -13,6 +14,7 @@ import rx.Observable;
 public class RetainedFragment extends Fragment {
     private CustomAsyncTask mCustomAsyncTask; // 定制的异步任务
     private Observable<Long> mObservable; // 观察者
+    private PublishSubject<Long> mSubject; // 主题
 
     private int mMode; // 进度条模式
     private boolean mBusy; // 是否繁忙
@@ -37,6 +39,14 @@ public class RetainedFragment extends Fragment {
 
     public void setObservable(Observable<Long> observable) {
         mObservable = observable;
+    }
+
+    public PublishSubject<Long> getSubject() {
+        return mSubject;
+    }
+
+    public void setSubject(PublishSubject<Long> subject) {
+        mSubject = subject;
     }
 
     public int getMode() {

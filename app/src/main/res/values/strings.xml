@@ -1,23 +1,21 @@
 <resources>
     <string name="app_name">wcl-continuous-demo</string>
 
-    <string name="async_task">异步任务</string>
-    <string name="intent_service">消息服务</string>
-    <string name="time_emitter">时间发射器</string>
-    <string name="delay_observable">延迟观察</string>
-    <string name="custom_collection">定制容器</string>
-    <string name="custom_iterator">定制适配器</string>
+    <string name="async_task">异步任务(可旋转)</string>
+    <string name="intent_service">消息服务(可旋转)</string>
+    <string name="time_interval">时间间隔(非旋转)</string>
+    <string name="delay_emit">延迟发射(非旋转)</string>
+    <string name="custom_iterator">定制迭代(可旋转)</string>
 
     <string-array name="updaterType">
         <item>@string/async_task</item>
         <item>@string/intent_service</item>
-        <item>@string/time_emitter</item>
-        <item>@string/delay_observable</item>
-        <item>@string/custom_collection</item>
+        <item>@string/time_interval</item>
+        <item>@string/delay_emit</item>
         <item>@string/custom_iterator</item>
     </string-array>
 
     <string name="track_leaks">检测泄露</string>
-    <string name="update_progress_desc">更新进度条并旋转设备</string>
+    <string name="update_progress_desc">在进度条更新时旋转设备</string>
 
 </resources>
