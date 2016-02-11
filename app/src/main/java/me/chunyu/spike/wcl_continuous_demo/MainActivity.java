@@ -190,7 +190,7 @@ public class MainActivity extends AppCompatActivity {
                 if (mObservable != null) {
                     mObservable.subscribeOn(Schedulers.io())
                             .delay(1, TimeUnit.SECONDS)
-                            .subscribeOn(AndroidSchedulers.mainThread())
+                            .observeOn(AndroidSchedulers.mainThread())
                             .subscribe(mSubscriber);
                 }
                 break;
@@ -284,6 +284,7 @@ public class MainActivity extends AppCompatActivity {
         return new Subscriber<Long>() {
             @Override public void onCompleted() {
                 setBusy(false);
+                mPbProgressBar.setProgress(0);
                 mRetainedFragment.setObservable(null);
             }
 
