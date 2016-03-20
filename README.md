@@ -1,4 +1,4 @@
 # wcl-continuous-demo
-多种异步线程的表示方法.
+使用 RxJava 跨页面更新控件
 
-[参考文章](http://www.jianshu.com/p/b5f8de0bc86c)
+[参考文章](http://www.wangchenlong.org/2016/03/20/160320-rx-continue-update/)
