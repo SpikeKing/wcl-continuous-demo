@@ -5,4 +5,4 @@
 
 本文: http://www.wangchenlong.org/2016/03/20/1603/205-rx-continue-update/
 
-[参考文章]http://www.wangchenlong.org/2016/03/20/1603/205-rx-continue-update/)
+[参考文章](http://www.wangchenlong.org/2016/03/20/1603/205-rx-continue-update/)
